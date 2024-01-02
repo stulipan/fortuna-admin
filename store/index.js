@@ -2,40 +2,43 @@
 // export const state = () => ({})
 
 
-export const state = () => ([])
-
-export const actions = {
-
-  // Initial Load Action
-  load ({ commit }) {
-    setTimeout(
-      commit,
-      1000,
-      'update',
-      { _id: 1, title: 'Product', price: 99.99 }
-    )
-  },
-
-  // Async Load Action
-  loadAsync ({ commit }) {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        commit('update', { _id: 1, title: 'Product', price: 99.99 })
-        resolve()
-      }, 1000)
-    })
-  }
-}
+// export const state = () => ([])
+//
+export const state = () => ({
+  vuexVariable: '',
+  prefixes: [],
+  selectedPrefix: '',
+  selectedPostfix: '',
+  selectedMidfix: '',
+})
 
 export const mutations = {
-  update (state, product) {
-    Object.assign(state, product)
+  updateSelectedPrefix(state, prefix) {
+    state.selectedPrefix = prefix;
   },
-  reset (state) {
-    Object.assign(state, {
-      _id: 0,
-      title: 'Unknown',
-      price: 0
-    })
-  }
+  updateSelectedPostfix(state, postfix) {
+    state.selectedPostfix = postfix;
+  },
+  updateSelectedMidfix(state, midfix) {
+    state.selectedMidfix = midfix;
+  },
+  updateVuexVariable(state, textValue) {
+    state.vuexVariable = textValue;
+  },
+  updatePrefixes(state, newPrefixes) {
+    state.prefixes = newPrefixes;
+  },
 }
+
+export const actions = {
+  setSelectedPrefix({ commit }, selectedPrefix) {
+    commit('updateSelectedPrefix', selectedPrefix)
+  },
+  setSelectedPostfix({ commit }, selectedPostfix) {
+    commit('updateSelectedPostfix', selectedPostfix)
+  },
+  setPrefixes({ commit }, newPrefixes) {
+    commit('updatePrefixes', newPrefixes);
+  },
+}
+

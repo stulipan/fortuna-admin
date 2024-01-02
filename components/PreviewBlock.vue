@@ -7,9 +7,12 @@
       @mouseleave="isHovered = false"
     >{{ previewContent }}
       <template v-if="isHovered">
-        <div class="w-100 h-100 position-absolute top-0 start-0" style="background: rgba(235,235,235,.2); transition">
+        <div class="w-100 h-100 position-absolute top-0 start-0" style="background: rgba(235,235,235,.2);">
           <div class="d-flex h-100 justify-content-center">
-            <button class="btn btn-primary align-self-center">{{ currentButtonText }}</button>
+<!--            <button class="btn btn-primary align-self-center">{{ currentButtonText }}</button>-->
+            <button
+              :class="['btn', isCopied ? 'btn-success' : 'btn-primary', 'align-self-center']"
+            >{{ currentButtonText }}</button>
           </div>
           <a href="#" @click.stop.prevent="copyToClipboard(previewContent)" class="stretched-link"></a>
         </div>
@@ -42,10 +45,15 @@ export default {
       type: String,
       default: 'Copied!',
     },
+    // buttonClass : {
+    //   type: String,
+    //   default: 'btn-primary'
+    // },
   },
   data() {
     return {
       isHovered: false,
+      isCopied: false,
       currentButtonText: '',
     };
   },
@@ -64,8 +72,10 @@ export default {
 
       // Change button text
       this.currentButtonText = this.buttonTextSuccess;
+      this.isCopied = true;
       setTimeout(() => {
         this.currentButtonText = this.buttonText;
+        this.isCopied = false;
       }, 5000);
     },
   },

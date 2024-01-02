@@ -3,7 +3,6 @@
     <div class="container container-lg mb-6">
        <div class="row">
           <div class="col-xl-12">
-
             <div class="row mt-2 mt-sm-3">
               <div class="col-12 correction-no-paddingX mb-3">
 
@@ -51,13 +50,13 @@
 
                       <div class="d-inline-block me-3">
                         <span>Base:</span>
-                        <template v-if="isExceededLimit(getPreviewOfBase(bundled))"> <!-- Characters exceeded -->
+                        <div v-if="isExceededLimit(getPreviewOfBase(bundled))"> <!-- Characters exceeded -->
                           <span class="text-danger">-{{ baseCharacterCounts[bundled.astrologicalSign.id] - inputLimit }}</span>
-                        </template>
+                        </div>
 
-                        <template v-else> <!-- Characters remaining -->
+                        <div v-else> <!-- Characters remaining -->
                           <span>+{{ inputLimit - baseCharacterCounts[bundled.astrologicalSign.id] }}</span>
-                        </template>
+                        </div>
                       </div>
 
                       <div class="d-inline-block me-3">
@@ -82,7 +81,6 @@
                                 class="form-control"
                                 @copy="saveBundledContent(bundled, $event)"
                               ></textarea>
-<!--                          @copy="handleCopy(bundled)"-->
 
                         </div>
                         <div class="col-md-4">
@@ -125,34 +123,6 @@
                                 class="form-control"
                                 @copy="saveBundledContent(bundled, $event)"
                               ></textarea>
-
-<!--                            <div v-if="bundled.addendum.content">-->
-<!--                              <div @click="enableTextarea(bundled)">-->
-<!--                                <textarea-->
-<!--                                  v-model="bundled.addendum.content"-->
-<!--                                  :id="`addendum_${bundled.astrologicalSign.name}`"-->
-<!--                                  @blur="disableTextarea(bundled)"-->
-<!--                                  maxlength="65535"-->
-<!--                                  :rows="increaseRowsInAddendum(bundled.addendum.content)"-->
-<!--                                  class="form-control"-->
-<!--                                  @copy="saveBundledContent(bundled, $event)"-->
-<!--                                ></textarea>-->
-<!--                              </div>-->
-<!--                            </div>-->
-<!--                            <div v-else>-->
-<!--                              <div @click="enableTextarea(bundled)">-->
-<!--                                <textarea-->
-<!--                                  v-model="bundled.addendum.content"-->
-<!--                                  :disabled="!addendumActiveStates[bundled.astrologicalSign.id]"-->
-<!--                                  :id="`addendum_${bundled.astrologicalSign.name}`"-->
-<!--                                  @blur="disableTextarea(bundled)"-->
-<!--                                  maxlength="65535"-->
-<!--                                  :rows="increaseRowsInAddendum(bundled.addendum.content)"-->
-<!--                                  class="form-control"-->
-<!--                                  @copy="saveBundledContent(bundled, $event)"-->
-<!--                                ></textarea>-->
-<!--                              </div>-->
-<!--                            </div>-->
 
                           </div>
                         </div>
@@ -215,6 +185,7 @@
 <script>
 import Cookies from 'js-cookie';
 import PreviewBlock from "@/components/PreviewBlock";
+import StulipanNotify from "@/plugins/StulipanNotify_const_orig.js";
 
 const API_URI = 'http://fortunaai.hu/api';
 const REWRITE_URI = 'http://www.fortunaai.hu/rewrite';
@@ -233,7 +204,7 @@ export default {
         'Szia, kedves {{cuf_9284767|fallback:"barátom"}}! Meghoztam a mai üzeneted.',
         'Hogy vagy, kedves {{cuf_9284767|fallback:"barátom"}}? Meghoztam a mai horoszkópod.',
         'Szép reggelt, kedves {{cuf_9284767|fallback:"barátom"}}!',
-        'Szép jó reggelt, {{cuf_9284767|fallback:"barátom"}}, itt is van a mai horoszkópod!',
+        'Jó reggelt, {{cuf_9284767|fallback:"barátom"}}, itt is van a mai horoszkópod!',
         'Jó reggelt, kedves {{cuf_9284767|fallback:"barátom"}}!',
         'Vidám reggelt, kedves {{cuf_9284767|fallback:"barátom"}}!',
         'Remélem jól vagy, kedves {{cuf_9284767|fallback:"barátom"}}!',
@@ -258,7 +229,7 @@ export default {
         'Remélem jól indul a hétvégéd, kedves {{cuf_9284767|fallback:"barátom"}}!',
         'Szép vasárnap reggelt, kedves {{cuf_9284767|fallback:"barátom"}}!',
         'Remélem pihentető hétvégéd volt, kedves {{cuf_9284767|fallback:"barátom"}}!',
-        'Hogy telt a hétvégéd, kedves {{cuf_9284767|fallback:"barátom"}}? Remélem jól!',
+        'Hogy telt a hétvégéd, kedves {{cuf_9284767|fallback:"barátom"}}?',
         '-------- LUNA HU -------- ',
         'Üdvözöllek, kedves {{cuf_9232715|fallback:"barátom"}}!',
         'Szia, kedves {{cuf_9232715|fallback:"barátom"}}!',
@@ -297,6 +268,7 @@ export default {
         '(Kérlek nyomj a gombra vagy írj ide valamit, hogy holnap is el tudjam küldeni a horoszkópod!)',
         '-------- LUNA HU -------- ',
         '(Kérlek nyomj a gombra vagy írj ide valamit, mert csak így tudom biztosan elküldeni a holnapi horoszkópot!)',
+        'Szeretnéd hallani nagy titkomat a Szerencse Karkötőmről?',
         '-------- LUNA RO -------- ',
         // '(Apasă pe buton sau scrie ceva, căci numai așa îți pot trimite cu siguranță horoscopul de mâine!)',
         // '(Apasă pe buton căci numai așa îți pot trimite horoscopul de mâine!)',
@@ -409,7 +381,7 @@ export default {
     },
     async onSubmit() {
       for (let bundled of this.bundledHoroscopes) {
-        this.onSubmitTextarea(bundled);
+        await this.onSubmitTextarea(bundled);
       }
     },
     async onSubmitTextarea(bundled) {
@@ -420,16 +392,21 @@ export default {
 
         // Update this.bundledHoroscopes with the response data
         const updatedBundled = response.data;
+        let hasAddendum = true;
         if (!updatedBundled.addendum) {
           updatedBundled.addendum = { content: '' }; // Initialize addendum object if null
+          hasAddendum = false;
         }
         // Find the index of the corresponding object in this.bundledHoroscopes
         const index = this.bundledHoroscopes.findIndex(item => item.astrologicalSign.id === updatedBundled.astrologicalSign.id);
 
         if (index !== -1) {
-          // Replace the existing object with the updated data received from the API response
-          this.bundledHoroscopes.splice(index, 1, updatedBundled);
+          this.bundledHoroscopes.splice(index, 1, updatedBundled); // Replace the existing object with the updated data received from the API response
         }
+
+
+        StulipanNotify.success(('Mentve. A "{sign}" szöveg kikopizva.').replace('{sign}', updatedBundled.astrologicalSign.name));
+
       } catch (error) {
         console.error(error);
       }
@@ -463,6 +440,8 @@ export default {
             bundled.addendum = { content: '' }; // Initialize addendum object if null
           }
         });
+
+        console.log(data)
 
         return { bundledHoroscopes: data, addendumActiveStates };
       } catch (error) {
@@ -547,8 +526,15 @@ export default {
 
     // Fetch current locale from URL
     this.currentLocale = this.$route.params.locale;
+    console.log(this.$store.state.vuexVariable);
 
   },
+  mounted() {
+    StulipanNotify.configure({
+      hasCloseButton: true,
+      duration: 8000, // 10s
+    });
+  }
 }
 </script>
 
@@ -559,4 +545,5 @@ export default {
 .text-light-s {
   color: #6d7175 !important;
 }
+
 </style>
