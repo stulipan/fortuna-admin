@@ -2,10 +2,12 @@ export default class StulipanModal {
   body
   modal
   closeButtons
+  backdrop
   previouslyFocusedElement
   firstFocusableElement
   lastFocusableElement
   isOpen = false;
+  isSidebar = false;
 
   constructor(options) {
     this.config = {
@@ -17,7 +19,14 @@ export default class StulipanModal {
     const { target, closeOnEsc, hasBackdrop } = this.config;
 
     this.modal = document.querySelector(this.config.target);
-    this.modalDialog = this.modal.querySelector('.modal-dialog');
+    this.modalDialog = this.modal.querySelector('[data-modal-dialog]');
+
+    this.backdrop = document.createElement('div');
+    this.backdrop.classList.add('modal-backdrop', 'hide');
+
+    this.isSidebar = this.modal.classList.contains('sidebar');
+    this.config.closeOnEsc = !this.isSidebar; // false
+
 
     this.closeButtons = this.modal.querySelectorAll('[data-close-modal]');
     if (this.closeButtons.length > 0) {
@@ -27,11 +36,14 @@ export default class StulipanModal {
       this.closeButtons[0].focus();
     }
 
-    // this.btnClose = this.modal.querySelector('[data-close-modal]');
-    // if (this.btnClose) {
-    //   this.btnClose.addEventListener('click', this.hide.bind(this));
-    //   this.btnClose.focus();
-    // }
+    // Close the modal when a link is clicked, which supposedly will navigate off the page
+    const links = this.modal.querySelectorAll('a[href]:not([href="#"])');
+    if (links.length > 0) {
+      links.forEach(link => {
+        link.addEventListener('click', this.hide.bind(this));
+      });
+    }
+
 
     // Trap focus
     this.previouslyFocusedElement = document.activeElement;
@@ -56,6 +68,8 @@ export default class StulipanModal {
         }
       });
     }
+
+    window.addEventListener('beforeunload', this.handleBeforeUnload.bind(this));
   }
 
   configure(options) {
@@ -69,11 +83,15 @@ export default class StulipanModal {
     this.modal.style.display = 'block';
     this.modal.classList.add('show');
     this.modal.setAttribute('aria-hidden', 'false');
+
+    this.addBackdrop();
     this.modalDialog.focus();
+
 
     const handleShowAnimation = (event) => {
       if (event.target === this.modal || this.modal.contains(event.target)) {
         this.modal.removeEventListener('animationend', handleShowAnimation);
+
         this.isOpen = true;
       }
     }
@@ -83,6 +101,11 @@ export default class StulipanModal {
   hide() {
     this.modal.classList.remove('show');
     this.modal.classList.add('hide');
+    document.body.style.overflow = '';
+    document.body.classList.remove('modal-open');
+    // this.backdrop.classList.remove('show');
+    this.removeBackdrop();
+
     //
     const handleAnimationEnd = (event) => {
       if (event.target === this.modal || this.modal.contains(event.target)) {
@@ -92,13 +115,26 @@ export default class StulipanModal {
         this.previouslyFocusedElement.focus();
 
         this.modal.style.display = 'none';
-        document.body.style.overflow = '';
-        document.body.classList.remove('modal-open');
         this.modal.setAttribute('aria-hidden', 'true');
         this.isOpen = false;
       }
     };
     this.modal.addEventListener('animationend', handleAnimationEnd);
+  }
+
+  addBackdrop() {
+    document.body.appendChild(this.backdrop);
+    this.backdrop.classList.add('show');
+  }
+  removeBackdrop() {
+    this.backdrop.classList.remove('show');
+    this.backdrop.addEventListener('transitionend', (event) => {
+      document.body.removeChild(this.backdrop);
+    })
+  }
+
+  handleBeforeUnload() {
+    this.hide()
   }
 
   toggle() {
@@ -129,31 +165,67 @@ export default class StulipanModal {
 
   hasTransition(element) {
     const computedStyle = getComputedStyle(element);
-    console.log(computedStyle.transition)
     return computedStyle.transition !== 'none' && computedStyle.transition !== '';
   }
 }
 
+// function initButtonListeners() {
+//   if (typeof document !== 'undefined') {
+//     const buttons = document.querySelectorAll('[data-open-modal]');
+//
+//     buttons.forEach((button) => {
+//       const targetModalId = button.getAttribute('data-open-modal');
+//       const modal = document.getElementById(targetModalId);
+//
+//       if (modal) {
+//         button.addEventListener('click', () => {
+//           const modalInstance = new StulipanModal({
+//             target: `#${targetModalId}`,
+//           });
+//           modalInstance.configure({closeOnEsc: true});
+//           modalInstance.show();
+//         });
+//       }
+//     });
+//   }
+// }
+//
+// if (typeof document !== 'undefined') {
+//   document.addEventListener('DOMContentLoaded', initButtonListeners);
+// }
 
-function initButtonListeners() {
-  if (typeof document !== 'undefined') {
-    const buttons = document.querySelectorAll('[data-open-modal]');
+const StulipanModalInit = {
+  initialize(modalId) {
+    this.initButtonListeners(modalId)
+  },
+  initButtonListeners(modalId) {
+    if (typeof document !== 'undefined') {
 
-    buttons.forEach((button) => {
-      const targetModalId = button.getAttribute('data-open-modal');
-      const modal = document.getElementById(targetModalId);
-
-      if (modal) {
-        button.addEventListener('click', () => {
-          const modalInstance = new StulipanModal({
-            target: `#${targetModalId}`,
-          });
-          modalInstance.configure({closeOnEsc: true});
-          modalInstance.show();
-        });
+      let buttons = null;
+      if (typeof modalId !== 'undefined') {
+        buttons = document.querySelectorAll(`[data-open-modal="${modalId}"]`);
+      } else {
+        buttons = document.querySelectorAll('[data-open-modal]');
       }
-    });
-  }
+      if (buttons.length === 0) return;
+
+      buttons.forEach((button) => {
+        const targetModalId = button.getAttribute('data-open-modal');
+        const modal = document.getElementById(targetModalId);
+
+        if (targetModalId === modal.id) {
+          button.addEventListener('click', () => {
+            const modalInstance = new StulipanModal({
+              target: `#${targetModalId}`,
+            });
+            // console.log('new StulipanModal');
+            modalInstance.configure({closeOnEsc: true});
+            modalInstance.show();
+          });
+        }
+      });
+    }
+  },
 }
 
-initButtonListeners();
+export { StulipanModalInit }

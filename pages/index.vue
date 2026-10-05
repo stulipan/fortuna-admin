@@ -33,6 +33,23 @@
                       </nuxt-link>
                     </li>
                     <li class="settings-item">
+                      <NuxtLink :to="{ name: 'show-rewritten' }" class="w-100 h-100">
+                        <div class="settings-item-body">
+                          <div class="settings-icon">
+                            <i class="fa-solid fa-box-archive"></i>
+                          </div>
+                          <div class="settings-option">
+                            <div>
+                              <span class="text-primary">Átírt horoszkópok</span>
+                            </div>
+                            <div>
+                              A régi felület, ahol átírtam az ezós horikat.
+                            </div>
+                          </div>
+                        </div>
+                      </NuxtLink>
+                    </li>
+                    <li class="settings-item">
                       <a href="http://www.fortunaai.hu/" target="_blank" class="w-100 h-100">
                         <div class="settings-item-body">
                           <div class="settings-icon">
@@ -49,31 +66,34 @@
                         </div>
                       </a>
                     </li>
+                    <li class="settings-item">
+                      <NuxtLink to="http://www.fortunaai.hu/" target="_blank" class="w-100 h-100">
+                        <div class="settings-item-body">
+                          <div class="settings-icon">
+                            <i class="fa-regular fa-clock"></i>
+                          </div>
+                          <div class="settings-option">
+                            <div>
+                              <span class="text-primary">Publikálások</span>
+                            </div>
+                            <div>
+                              A publikált horoszkópok listája, publikálási dátum szerint.
+                            </div>
+                          </div>
+                        </div>
+                      </NuxtLink>
+                    </li>
                   </ul>
                 </div>
               </div>
             </div>
-            <div class="col-lg-12 correction-no-paddingX mt-20px">
-              <div class="card">
-                <div class="card-body">
-                  <div class="h3 card-title">Átírt horoszkópok</div>
-                </div>
-
-                <div class="table-responsive">
-                  <table class="table table-hover table-striped">
-                    <tbody>
-                      <tr v-for="item in fetchedData" :key="item.date">
-                        <td>
-                          <nuxt-link :to="`/show-rewritten/${item.date}/hu`">
-                            {{ item.date }}
-                          </nuxt-link>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+<!--            <div class="col-lg-12 correction-no-paddingX mt-20px">-->
+<!--              <div class="card">-->
+<!--                <div class="card-body">-->
+<!--                  <div class="h3 card-title">Átírt horoszkópok</div>-->
+<!--                </div>-->
+<!--              </div>-->
+<!--            </div>-->
           </div>
         </div>
       </div>
@@ -81,21 +101,27 @@
 </template>
 
 <script>
-const API_URI = 'http://fortunaai.hu/api';
 export default {
-  async asyncData() {
-    try {
-      // Make an API request to fetch the data
-      const response = await fetch(API_URI + '/horoscope-final');
-      const data = await response.json();
-
-      // Return the fetched data
-      return { fetchedData: data };
-    } catch (error) {
-      // Handle error if the request fails
-      console.error(error);
-      return { fetchedData: null };
-    }
+  // async asyncData({ app }) {
+  //   const routeNames = app.router.options.routes.map(route => route.name).filter(Boolean);
+  //   console.log('All Route Names:', routeNames);
+  //
+  //   // Your other logic here
+  //
+  //   return {};
+  // },
+  head() {
+    return {
+      title: 'Dashboard',
+      meta: [
+        {
+          name: 'Dashboard',
+          content: 'Fortuna admin dashboard-ja',
+        },
+      ],
+    };
+  },
+  created() {
   }
 }
 </script>

@@ -1,7 +1,6 @@
 <template>
     <div>
 
-<!--      v-model="value"-->
         <multiselect
                 :value="value"
                 @input="updateValue"
@@ -12,19 +11,24 @@
                 :label="label"
                 :track-by="trackBy"
                 :searchable="searchable"
+                :internalSearch="internalSearch"
+                :options-limit="optionsLimit"
+                @search-change="asyncFind"
+
                 :clearOnSelect="clearOnSelect"
                 :hideSelected="hideSelected"
                 :placeholder="placeholder"
                 :blockKeys="blockKeys"
                 :allowEmpty="allowEmpty"
                 :resetAfter="resetAfter"
-                :internalSearch="internalSearch"
-                :close-on-select="closeOnSelect"
+
                 :custom-label="customLabel"
                 :taggable="taggable"
                 @select="selectOption"
                 @tag="addTag"
                 @remove="option => removeOption(option)"
+								removeBtnTitle="Eltávolítás"
+
                 :tagPosition="tagPosition"
                 :max="max"
                 :preserveSearch="preserveSearch"
@@ -44,34 +48,45 @@
                 :deselectLabel="deselectLabel"
                 :selectedLabel="selectedLabel"
                 :tagPlaceholder="tagPlaceholder"
+
+                :close-on-select="closeOnSelect"
+                @close="handleClose"
         >
             <span slot="noResult">{{noResultLabel}}</span>
             <template slot="selection" slot-scope="{ values }">
                 <span class="multiselect__placeholder" v-if="values.length">{{ placeholder }}</span>
             </template>
             <template slot="option" slot-scope="props">
-                <div class="custom-control custom-checkbox">
-                    <input type="checkbox" :checked="isSelected(props.option)" class="custom-control-input mr-2">
-                    <label class="custom-control-label">{{ getOptionLabel(props.option) }}</label>
+                <div class="form-check">
+                    <input class="form-check-input mr-2" type="checkbox" :checked="isSelected(props.option)">
+                    <label class="form-check-label">{{ getOptionLabel(props.option) }}</label>
                 </div>
             </template>
         </multiselect>
         <div class="">
             <div class="vertical-form-row">
-                <div v-for="tag in value" class="vertical-col" :key="tag.id">
-                    <div class="filter-tag">
-                      <div class="filter-tag-content">
-                        <div class="">
-                          <slot>{{ tag.name }}</slot>
-                        </div>
-                        <a href="#" @click.stop.prevent="handleTagClick(tag)" class="stretched-link"></a>
-                      </div>
+                <div class="vertical-col" v-for="(tag) in value" :key="tag.id">
+                  <Tag
+                    :tagContent="tag.name"
+                    :tagText="tag.name"
+                    :allowRemove="true"
+                    @tag-removed="removeOption(tag)"
+                    :url="tagPath + tag.name"
+                  >
+                  </Tag>
 
-<!--                        <div class="filter-tag-content">{{option.name}}</div>-->
-                        <a href="#" @click.stop.prevent="removeOption(tag)" class="filter-tag-button">
-                          <i class="fa-solid fa-xmark"></i>
-                        </a>
-                    </div>
+<!--                    <div class="filter-tag">-->
+<!--                      <div class="filter-tag-content">-->
+<!--                        <div class="">-->
+<!--                          <slot>{{ tag.name }}</slot>-->
+<!--                        </div>-->
+<!--                        <a href="#" @click.stop.prevent="handleTagClick(tag)" class="stretched-link"></a>-->
+<!--                      </div>-->
+
+<!--                      <a href="#" @click.stop.prevent="removeOption(tag)" class="filter-tag-action">-->
+<!--                        <i class="fa-solid fa-xmark"></i>-->
+<!--                      </a>-->
+<!--                    </div>-->
                 </div>
             </div>
         </div>
@@ -81,11 +96,14 @@
 <script>
     import Multiselect from 'vue-multiselect'
     import multiselectMixin from 'vue-multiselect'
+    import Tag from "@/components/Tag";
+
     export default {
         name: 'multiselect-bellow',
         mixins: [multiselectMixin],
         components: {
-            Multiselect,
+          Multiselect,
+          Tag
         },
         props: {
             // id: [Number, String],
@@ -133,6 +151,7 @@
 
             noResultLabel: String,
             myClass: String,
+            tagPath: String,
 
             // /**
             //  * Function to interpolate the custom label
@@ -165,12 +184,11 @@
             this.$emit('input', value);
           },
           selectOption(option) {
-            // this.$emit('select', this.value);
             this.$emit('option-selected', option);
           },
           removeOption (option) {
             // console.log(ev);
-            console.log(option);
+            // console.log(option);
             // console.log(this.value.indexOf(option[this.trackBy]));
 
             // const index = typeof option === 'object'
@@ -192,6 +210,12 @@
           handleTagClick(tag) {
             this.$emit('tag-clicked', tag)
           },
+          asyncFind(searchQuery) {
+            this.$emit('search-change', searchQuery);
+          },
+          handleClose(value, id) {
+            this.$emit('close', value, id)
+          }
         },
        mounted() {
        }

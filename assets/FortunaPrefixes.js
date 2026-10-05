@@ -114,7 +114,7 @@ export const FortunaPrefixes = {
       end: '!'
     },
     {
-      start: 'Szép szombati reggelt, kedves',
+      start: 'Szép szombat reggelt, kedves',
       end: '!'
     },
     {

@@ -185,7 +185,7 @@
 <script>
 import Cookies from 'js-cookie';
 import PreviewBlock from "@/components/PreviewBlock";
-import StulipanNotify from "@/plugins/StulipanNotify_const_orig.js";
+import {stulipanNotify} from "@/plugins/StulipanNotify";
 
 const API_URI = 'http://fortunaai.hu/api';
 const REWRITE_URI = 'http://www.fortunaai.hu/rewrite';
@@ -294,16 +294,22 @@ export default {
       ],
     }
   },
-  async asyncData({params}) {
+
+  async asyncData({params, $axios}) {
+    // const tokenValue = process.env.BACKEND_API_TOKEN;
     const date = params.date;
     const locale = params.locale;
 
-    // this.fetchApi(date, locale);
-
     try {
-      // Make an API request to fetch the specific item based on the ID
-      const response = await fetch(API_URI + `/horoscope-final/${date}/${locale}`);
-      const data = await response.json();
+      // const response = await fetch(API_URI + `/horoscope-final/${date}/${locale}`, {
+      //   headers: {
+      //     'Authorization': `Bearer ${tokenValue}`,
+      //   },
+      // });
+      // const data = await response.json();
+
+      const response = await $axios.get(API_URI + `/horoscope-final/${date}/${locale}`);
+      const data = response.data;
 
       const addendumActiveStates = {};
       data.forEach((bundled) => {
@@ -360,8 +366,8 @@ export default {
       const selectedPostfix = this.selectedPostfix;
       Cookies.set('selectedPostfix', selectedPostfix, { expires: 365 });
     },
-    saveBundledContent(bundled, content) {
-      this.onSubmitTextarea(bundled);
+    async saveBundledContent(bundled, content) {
+      await this.onSubmitTextarea(bundled);
     },
     copyToClipboard(content) {
       const hiddenTextarea = this.$refs.hiddenTextarea;
@@ -386,6 +392,7 @@ export default {
     },
     async onSubmitTextarea(bundled) {
       try {
+        console.log(this.$axios.defaults);
         const response = await this.$axios.put('http://fortunaai.hu/api/horoscope-bundled/', bundled);
         console.log(response);
         console.log(response.data.astrologicalSign.name);
@@ -404,51 +411,34 @@ export default {
           this.bundledHoroscopes.splice(index, 1, updatedBundled); // Replace the existing object with the updated data received from the API response
         }
 
-
-        StulipanNotify.success(('Mentve. A "{sign}" szöveg kikopizva.').replace('{sign}', updatedBundled.astrologicalSign.name));
-
+        stulipanNotify.success(('Mentve. A "{sign}" szöveg kikopizva.').replace('{sign}', updatedBundled.astrologicalSign.name));
       } catch (error) {
         console.error(error);
       }
     },
-    // async onSubmit() {
+
+    // async fetchApi(date, locale) {
     //   try {
-    //     for (let bundled of this.bundledHoroscopes) {
-    //       // Prepare the data to be sent
-    //       const data = bundled;
-    //       // Make the API request for each bundledHoroscope
-    //       const response = await this.$axios.put('http://fortunaai.hu/api/horoscope-bundled/', data);
+    //     // Make an API request to fetch the specific item based on the ID
+    //     const response = await fetch(API_URI + `/horoscope-final/${date}/${locale}`);
+    //     const data = await response.json();
     //
-    //       // Handle the response for each bundledHoroscope (e.g., show success message, redirect, etc.)
-    //       console.log(response);
-    //     }
+    //     const addendumActiveStates = {};
+    //     data.forEach((bundled) => {
+    //       addendumActiveStates[bundled.astrologicalSign.id] = false;
+    //       if (!bundled.addendum) {
+    //         bundled.addendum = { content: '' }; // Initialize addendum object if null
+    //       }
+    //     });
+    //
+    //     console.log(data)
+    //
+    //     return { bundledHoroscopes: data, addendumActiveStates };
     //   } catch (error) {
-    //     // Handle the error (e.g., show error message, log, etc.)
     //     console.error(error);
+    //     return { bundledHoroscopes: null };
     //   }
-    // }
-    async fetchApi(date, locale) {
-      try {
-        // Make an API request to fetch the specific item based on the ID
-        const response = await fetch(API_URI + `/horoscope-final/${date}/${locale}`);
-        const data = await response.json();
-
-        const addendumActiveStates = {};
-        data.forEach((bundled) => {
-          addendumActiveStates[bundled.astrologicalSign.id] = false;
-          if (!bundled.addendum) {
-            bundled.addendum = { content: '' }; // Initialize addendum object if null
-          }
-        });
-
-        console.log(data)
-
-        return { bundledHoroscopes: data, addendumActiveStates };
-      } catch (error) {
-        console.error(error);
-        return { bundledHoroscopes: null };
-      }
-    },
+    // },
     changeLocale(locale) {
       this.currentLocale = locale;
       this.$router.push({params: { date: this.$route.params.date, locale: locale }})
@@ -530,7 +520,7 @@ export default {
 
   },
   mounted() {
-    StulipanNotify.configure({
+    stulipanNotify.configure({
       hasCloseButton: true,
       duration: 8000, // 10s
     });

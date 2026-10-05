@@ -5,36 +5,91 @@
           <div class="row">
             <div class="col-lg-12 mb-3">
               <div>
-                <button data-open-modal="devModal" class="btn btn-danger" role="button">Itt van egy modal.</button>
+
+                <button data-open-modal="devSidebar" class="btn btn-secondary" role="button">
+                  <span class="fa-lg me-2">
+                    <i class="fa-solid fa-tags"></i>
+                  </span>
+                  Összes címke
+                </button>
+
+<!--                <button @click.prevent="openModal('devModalComponent')" class="btn btn-secondary" role="button">-->
+                <button data-open-modal="devModalComponent" class="btn btn-secondary" role="button">
+                  <span class="fa-lg me-2">
+                    <i class="fa-regular fa-window-maximize"></i>
+                  </span>
+                  Modal
+                </button>
+
+                <div class="d-inline-block">
+                  <DatePicker
+                    v-model="currentDate"
+                    @input="handleDateValueChanged"
+                  ></DatePicker>
+                </div>
+
               </div>
-              <div ref="modal" class="modal fadeX" id="devModal" role="dialog" aria-modal="true" aria-labelledby="devModalTitle">
-                <div class="modal-dialog modal-dialog-centeredX modal-dialog-scrollable" tabindex="-1">
-                  <div class="modal-content">
-                    <button type="button" class="close" data-close-modal="modal" aria-label="Close">
-                      <span aria-hidden="true"></span>
-                    </button>
-                    <div class="modal-header">
-                      <h4 class="modal-title" id="devModalTitle">Modal title</h4>
-                    </div>
-                    <div class="modal-body">
-<!--                      <h4 class="modal-title mb-3" id="devModalTitle">Modal title</h4>-->
-                      <p>Modal body text goes here.</p>
-                      <p>Ugye veled is előfordult már, hogy eszedbe jutott egy kedves ismerős? Vagy amikor munkaidőben csak a szerelmedre tudtál gondolni, netán hálát éréztél valaki iránt de éppen nem tudtad miképpen mutathatod ki az illető felé? Ezek mind gyönyörűszép emberi érzések. A Difiorival olyan szolgáltatást álmodtunk meg, ami révén könyedén kifejezheted ezen érzéseidet, szeretteid tudtukra adhatod, hogy gondolsz rájuk és menyire fontosak neked.</p>
-                      <p>Ugye veled is előfordult már, hogy eszedbe jutott egy kedves ismerős? Vagy amikor munkaidőben csak a szerelmedre tudtál gondolni, netán hálát éréztél valaki iránt de éppen nem tudtad miképpen mutathatod ki az illető felé? Ezek mind gyönyörűszép emberi érzések. A Difiorival olyan szolgáltatást álmodtunk meg, ami révén könyedén kifejezheted ezen érzéseidet, szeretteid tudtukra adhatod, hogy gondolsz rájuk és menyire fontosak neked.</p>
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-close-modal="modal">Close</button>
-                      <button type="button" class="btn btn-primary">Save changes</button>
+
+
+              <Modal
+                id="devModalComponent"
+                :isCentered="false"
+                :isScrollable="true"
+              >
+                <template #modal-title>
+                  <h4 class="modal-title">A horoszkópszövegekben használt címkék listája</h4>
+                </template>
+                <template #modal-body>
+                  <p>Kattints valamelyik címkére, és az adott horoszkópszövegek kerülnek kilistázásra.</p>
+                  <div class="vertical-form-row" v-if="tags && tags.length > 0">
+                    <div class="vertical-col" v-for="(tag) in tags" :key="tag.id">
+                      <Tag
+                        :tagContent="tag.name"
+                        :tagText="tag.name"
+                        :url="tagPath + tag.name"
+                      >
+                      </Tag>
                     </div>
                   </div>
-                </div>
-              </div>
+                </template>
+                <template #modal-footer>
+                  <button type="button" class="btn btn-secondary" data-close-modal="modal">Bezár</button>
+                  <button type="button" class="btn btn-primary">Mentés</button>
+                </template>
+              </Modal>
+
+              <Sidebar
+                id="devSidebar"
+                :isScrollable="true"
+              >
+                <template #modal-title>
+                  <h4 class="modal-title">A horoszkópszövegekben használt címkék listája</h4>
+                </template>
+                <template #modal-body>
+                  <p>Kattints valamelyik címkére, és az adott horoszkópszövegek kerülnek kilistázásra.</p>
+                  <div class="vertical-form-row" v-if="tags && tags.length > 0">
+                    <div class="vertical-col" v-for="(tag) in tags" :key="tag.id">
+                      <Tag
+                        :tagContent="tag.name"
+                        :tagText="tag.name"
+                        :url="tagPath + tag.name"
+                      >
+                      </Tag>
+                    </div>
+                  </div>
+                </template>
+                <template #modal-footer>
+                  <button type="button" class="btn btn-secondary" data-close-modal="modal">Bezár</button>
+                </template>
+              </Sidebar>
+
+
             </div>
             <div class="col-lg-12 mb-3">
               <div class="header-wrapper">
                 <div class="header-goback">
                   <div class="x">
-                    <a href="#" class="btn btn-secondary btn-go-back" @click.prevent="$router.go(-1)"></a>
+                    <NuxtLink :to="goBackTo" class="btn btn-secondary btn-go-back"></NuxtLink>
                   </div>
                 </div>
                 <div class="header-title">
@@ -57,15 +112,28 @@
                   </div>
                 </div>
                 <div class="header-actions">
-                  <button @click.prevent="createEmptyHoroscopeText" class="btn btn-secondary me-2">
+                  <button @click.prevent="createEmptyHoroscopeText" class="btn btn-secondary me-2 text-nowrap">
                     <i class="fa-solid fa-pen me-2"></i> Szöveg hozzáadása
                   </button>
-                  <button @click.prevent="togglePreview" :class="{ 'btn-primary': !isPreview, 'btn-secondary': isPreview }" class="btn me-2">
-                    <span v-if="isPreview"><i class="fa-solid fa-eye-slash fa-lg me-2"></i> Preview OFF</span>
-                    <span v-else><i class="fa-solid fa-eye fa-lg me-2"></i> Preview ON</span>
+                  <button @click.prevent="togglePreview" :class="{ 'btn-primary': !isPreview, 'btn-secondary': isPreview }" class="btn me-2 text-nowrap">
+                    <span v-if="isPreview">
+                      <span class="fa-lg me-2">
+                        <i class="fa-solid fa-eye-slash"></i>
+                      </span>
+                      Előnézet bezárása
+                    </span>
+                    <span v-else>
+                      <span class="fa-lg me-2">
+                        <i class="fa-solid fa-eye"></i>
+                      </span>
+                      Előnézet
+                    </span>
                   </button>
-                  <button v-if="isPreview" @click.prevent="syncHoroscopeToManychat" class="btn btn-success">
-                    <i class="fa-solid fa-upload me-2"></i> Feltöltés
+                  <button v-if="isPreview" @click.prevent="syncHoroscopeToManychat" class="btn btn-success text-nowrap">
+                    <span class="fa-lg me-2">
+                      <i class="fa-solid fa-upload"></i>
+                    </span>
+                    Feltöltés
                   </button>
                 </div>
               </div>
@@ -91,53 +159,69 @@
               </div>
             </div>
 
-            <div class="col-lg-12 mt-3">
-              <Pagination
-                v-if="!isFetchingData"
-                :currentPage="currentPage"
-                :totalPages="totalPages"
-                :prevText="paginationPrevText"
-                :nextText="paginationNextText"
-                @page-change="handlePageChange"
-              />
-            </div>
+<!--            <div v-if="isFetchingData">-->
+<!--              Loading...-->
+<!--            </div>-->
+            <div v-if="!isFetchingData">
+              <div v-if="horoscopeTexts.length">
+                <div class="col-lg-12 mt-3">
+                  <Pagination
+                    v-if="!isFetchingData"
+                    :currentPage="currentPage"
+                    :totalPages="totalPages"
+                    :prevText="paginationPrevText"
+                    :nextText="paginationNextText"
+                    @page-change="handlePageChange"
+                  />
+                </div>
 
-            <div class="col-lg-12 mt-20px">
-              <HoroscopeTextPublisher
-                v-for="(horoscopeText, index) in horoscopeTexts"
-                :key="horoscopeText.id"
-                :horoscopeText="horoscopeText"
-                :index="index"
-                :astrological-signs="astrologicalSigns"
-                :tags="tags"
-                :isPreview="isPreview"
+                <div class="col-lg-12 mt-20px">
+                  <HoroscopeTextPublisher
+                    v-for="(horoscopeText, index) in horoscopeTexts"
+                    :key="horoscopeText.id"
+                    :horoscopeText="horoscopeText"
+                    :index="index"
+                    :astrological-signs="astrologicalSigns"
+                    :tags="tags"
+                    :currentDate="currentDate"
+                    :isPreview="isPreview"
 
-                applyBtnClass="btn btn-smX btn-primary"
-                cancelBtnClass="btn btn-smX btn-secondary"
+                    applyBtnClass="btn btn-primary"
+                    cancelBtnClass="btn btn-secondary"
 
-                @horoscope-text-published-saved="data => addHoroscopeTextPublished(index, data)"
-                @horoscope-text-published-removed="data => removeHoroscopeTextPublished(index, data)"
-                @tag-selected="data => selectTag(index, data)"
-                @tag-added="data => addTag(index, data)"
-                @tag-removed="data => removeTag(index, data)"
+                    @horoscope-text-published-saved="data => addHoroscopeTextPublished(index, data)"
+                    @horoscope-text-published-removed="data => removeHoroscopeTextPublished(index, data)"
+                    @tag-selected="data => selectTag(index, data)"
+                    @tag-added="data => addTag(index, data)"
+                    @tag-removed="data => removeTag(index, data)"
 
-                @base-saved="editedText => saveEditedHoroscopeText(index, horoscopeText)"
-                @addendum-saved="editedText => saveEditedHoroscopeText(index, horoscopeText, false)"
+                    @base-saved="editedText => saveEditedHoroscopeText(index, horoscopeText)"
+                    @addendum-saved="editedText => saveEditedHoroscopeText(index, horoscopeText, false)"
 
-                @horoscope-text-removed="removeHoroscopeText(index)"
-              />
-<!--              @base-saved="editedText => saveEditedText(index, editedText)"-->
-<!--              @addendum-saved="editedText => saveEditedText(index, editedText, false)"-->
-            </div>
+                    @horoscope-text-removed="removeHoroscopeText(index)"
+                  />
+                </div>
 
-            <div class="col-lg-12 mt-3">
-              <Pagination
-                :currentPage="currentPage"
-                :totalPages="totalPages"
-                :prevText="paginationPrevText"
-                :nextText="paginationNextText"
-                @page-change="handlePageChange"
-              />
+                <div class="col-lg-12 mt-3">
+                  <Pagination
+                    :currentPage="currentPage"
+                    :totalPages="totalPages"
+                    :prevText="paginationPrevText"
+                    :nextText="paginationNextText"
+                    @page-change="handlePageChange"
+                  />
+                </div>
+              </div>
+
+              <NotFound v-else
+                        :title="fetchError.message"
+                        description="Próbáld meg módosítani a szűrőket vagy a keresési kifejezést."
+              >
+                <template #not-found-icon>
+                  <i class="fa-regular fa-file-lines"></i>
+                </template>
+              </NotFound>
+
             </div>
 
             <div class="col-lg-12 mt-20px mb-4">&nbsp;
@@ -154,11 +238,18 @@ import {Wording} from "assets/Wording.js"
 import {FortunaPrefixes} from "assets/FortunaPrefixes.js"
 import HoroscopeTextPublisher from "@/components/HoroscopeTextPublisher";
 import Multiselect from "vue-multiselect";
+import Tag from "@/components/Tag";
 import StulipanNotify from "@/plugins/StulipanNotify";
 import {stulipanNotify} from "@/plugins/StulipanNotify";
 import StulipanModal from "@/plugins/StulipanModal";
+import { StulipanModalInit } from "@/plugins/StulipanModal";
 import Pagination from "~/components/Pagination";
 import Cookies from "js-cookie";
+import Modal from "@/components/stulipan/Modal";
+import Sidebar from "@/components/stulipan/Sidebar";
+import NotFound from "@/components/stulipan/NotFound";
+
+import DatePicker from "~/components/stulipan/DatePicker";
 
 const API_URI = 'http://fortunaai.hu/api';
 const API_HOROSCOPE_TEXT = 'http://fortunaai.hu/api/horoscope-texts/';
@@ -171,124 +262,109 @@ const API_POPULATE_BOT_FIELDS = 'http://fortunaai.hu/api/manychat/populate';
 
 export default {
   components: {
+    Modal,
+    Sidebar,
     Multiselect,
+    Tag,
     HoroscopeTextPublisher,
-    Pagination
+    Pagination,
+    DatePicker,
+    NotFound
   },
 
   data() {
     return {
+      tokenValue: this.$config.BACKEND_API_TOKEN,
       isFetchingData: true,
+      fetchError: {
+        // horoscopeTexts: {},
+        // horoscopeTextCount: {},
+        // astrologicalSigns: {},
+        // tags: {},
+      },
 
       isPreview: false,
       date: null,
       horoscopeTexts: [],
       horoscopeTextsCount: null,
       astrologicalSigns: [], // This should be populated in asyncData
-      tags: [],
+      tags: [], // This should be populated in asyncData
+      currentDate: null,
 
       currentPage: 1,
       // totalPages: null,
       pageSize: 20,
       paginationPrevText: Wording.generic.previous,
       paginationNextText: Wording.generic.next,
-      // requestQueue: new RequestQueue(),
       prefixes: [],
-      // prefixesAfterName: [],
-      // prefixesCombined: [],
       postfixes: FortunaPrefixes.postfixes,
       midfix: FortunaPrefixes.midfix,
       selectedPrefix: '',
       selectedPostfix: '',
+
+      tagPath: '/horoscope-texts/tag/',
+      goBackTo: {},
+
+      modal: {},
     };
   },
 
-  async asyncData({params, query}) {
-
+  async asyncData({params, $axios}) {
     const date = params.date;
-    // const page = params.page || 1;
 
     try {
       console.log('asyncData')
-      console.log(`Query page: ` + query.page);
       const [
-        // horoscopeTextsResponse, horoscopeTextsResponseCount,
         astrologicalSignsResponse, tagsResponse] = await Promise.all([
-        // fetch(date ? API_HOROSCOPE_TEXT + `?page=1&publishDate=${date}` :API_HOROSCOPE_TEXT + `?page=1`),
-        // fetch(API_HOROSCOPE_TEXT_COUNT + (date ? `?publishDate=${date}` : '')),
-        fetch(API_ASTROLOGICAL_SIGN),
-        fetch(API_TAGS),
+          $axios.get(API_ASTROLOGICAL_SIGN),
+          $axios.get(API_TAGS),
       ]);
 
-      // // Check the first API response
-      // if (!horoscopeTextsResponse.ok) {
-      //   if (horoscopeTextsResponse.status >= 400 && horoscopeTextsResponse.status < 500) {
+      if (astrologicalSignsResponse.status !== 200) {
+        console.error(astrologicalSignsResponse.statusText);
+      }
+
+      if (tagsResponse.status !== 200) {
+        console.error(tagsResponse.statusText);
+      }
+
+      // if (!astrologicalSignsResponse.ok) {
+      //   if (astrologicalSignsResponse.status >= 400 && astrologicalSignsResponse.status < 500) {
       //     // console.error(`Client-side error with status: ${response.status}`);  // Handle client-side errors (status codes in the 400 range)
       //
-      //     const error = await horoscopeTextsResponse.json();
+      //     const error = await astrologicalSignsResponse.json();
       //
       //     console.error(error.message);
       //     // TODO: Error notification
       //
-      //     return { horoscopeTexts: null }; // Or return an appropriate value for client errors
+      //     return {astrologicalSigns: null}; // Or return an appropriate value for client errors
       //   } else {
-      //     throw new Error(`API request failed with status: ${horoscopeTextsResponse.status}`);  // Handle other server-side errors (status codes not in the 400 range)
+      //     throw new Error(`API request failed with status: ${astrologicalSignsResponse.status}`);  // Handle other server-side errors (status codes not in the 400 range)
       //   }
       // }
       //
-      // if (!horoscopeTextsResponseCount.ok) {
-      //   if (horoscopeTextsResponseCount.status >= 400 && horoscopeTextsResponseCount.status < 500) {
+      // if (!tagsResponse.ok) {
+      //   if (tagsResponse.status >= 400 && tagsResponse.status < 500) {
       //     // console.error(`Client-side error with status: ${response.status}`);  // Handle client-side errors (status codes in the 400 range)
       //
-      //     const error = await horoscopeTextsResponseCount.json();
+      //     const error = await tagsResponse.json();
       //
       //     console.error(error.message);
       //     // TODO: Error notification
       //
-      //     return { horoscopeTextsCount: null };
+      //     return { tags: null }; // Or return an appropriate value for client errors
       //   } else {
-      //     throw new Error(`API request failed with status: ${horoscopeTextsResponseCount.status}`);  // Handle other server-side errors (status codes not in the 400 range)
+      //     throw new Error(`API request failed with status: ${tagsResponse.status}`);  // Handle other server-side errors (status codes not in the 400 range)
       //   }
       // }
 
-      if (!astrologicalSignsResponse.ok) {
-        if (astrologicalSignsResponse.status >= 400 && astrologicalSignsResponse.status < 500) {
-          // console.error(`Client-side error with status: ${response.status}`);  // Handle client-side errors (status codes in the 400 range)
+      // const astrologicalSignsData = await astrologicalSignsResponse.json();
+      // const tagsData = await tagsResponse.json();
 
-          const error = await astrologicalSignsResponse.json();
-
-          console.error(error.message);
-          // TODO: Error notification
-
-          return {astrologicalSigns: null}; // Or return an appropriate value for client errors
-        } else {
-          throw new Error(`API request failed with status: ${astrologicalSignsResponse.status}`);  // Handle other server-side errors (status codes not in the 400 range)
-        }
-      }
-
-      if (!tagsResponse.ok) {
-        if (tagsResponse.status >= 400 && tagsResponse.status < 500) {
-          // console.error(`Client-side error with status: ${response.status}`);  // Handle client-side errors (status codes in the 400 range)
-
-          const error = await tagsResponse.json();
-
-          console.error(error.message);
-          // TODO: Error notification
-
-          return { tags: null }; // Or return an appropriate value for client errors
-        } else {
-          throw new Error(`API request failed with status: ${tagsResponse.status}`);  // Handle other server-side errors (status codes not in the 400 range)
-        }
-      }
-
-      // const horoscopeTextsData = await horoscopeTextsResponse.json();
-      // const horoscopeTextsCountData = await horoscopeTextsResponseCount.json();
-      const astrologicalSignsData = await astrologicalSignsResponse.json();
-      const tagsData = await tagsResponse.json();
+      const astrologicalSignsData = astrologicalSignsResponse.data;
+      const tagsData = tagsResponse.data;
 
       return {
-        // horoscopeTexts: horoscopeTextsData,
-        // horoscopeTextsCount: horoscopeTextsCountData.count,
         astrologicalSigns: astrologicalSignsData,
         tags: tagsData,
         date: date,
@@ -296,8 +372,6 @@ export default {
     } catch (error) {
       console.error(error);
       return {
-        // horoscopeTexts: null,
-        // horoscopeTextsCountData: null,
         astrologicalSigns: null,
         tags: null,
       };
@@ -310,6 +384,16 @@ export default {
     },
   },
   methods: {
+    handleDateValueChanged(newValue) {
+      // console.log('value has changed: '+ newValue);
+      this.currentDate = newValue;
+    },
+    openModal(targetModalId) {
+      this.modal = new StulipanModal({
+        target: `#${targetModalId}`,
+      });
+      this.modal.show();
+    },
     async fetchData() {
       const date = this.$route.params.date;
       const tag = this.$route.params.tag;
@@ -326,88 +410,30 @@ export default {
         }
 
         const [horoscopeTextsResponse, horoscopeTextsResponseCount] = await Promise.all([
-          fetch(API_HOROSCOPE_TEXT + apiQueryParams),
-          fetch(API_HOROSCOPE_TEXT_COUNT + apiQueryParams),
+          this.$axios.get(API_HOROSCOPE_TEXT + apiQueryParams),
+          this.$axios.get(API_HOROSCOPE_TEXT_COUNT + apiQueryParams),
         ]);
 
-        if (!horoscopeTextsResponse.ok) {
-          if (horoscopeTextsResponse.status >= 400 && horoscopeTextsResponse.status < 500) {
-            // console.error(`Client-side error with status: ${response.status}`);  // Handle client-side errors (status codes in the 400 range)
-
-            const error = await horoscopeTextsResponse.json();
-
-            console.error(error.message);
-            // TODO: Error notification
-
-            return { horoscopeTexts: null }; // Or return an appropriate value for client errors
-          } else {
-            throw new Error(`API request failed with status: ${horoscopeTextsResponse.status}`);  // Handle other server-side errors (status codes not in the 400 range)
-          }
+        if (horoscopeTextsResponse.status !== 200) {
+          console.error(horoscopeTextsResponse.statusText);
         }
 
-        if (!horoscopeTextsResponseCount.ok) {
-          if (horoscopeTextsResponseCount.status >= 400 && horoscopeTextsResponseCount.status < 500) {
-            // console.error(`Client-side error with status: ${response.status}`);  // Handle client-side errors (status codes in the 400 range)
-
-            const error = await horoscopeTextsResponseCount.json();
-
-            console.error(error.message);
-            // TODO: Error notification
-
-            return { horoscopeTextsCount: null };
-          } else {
-            throw new Error(`API request failed with status: ${horoscopeTextsResponseCount.status}`);  // Handle other server-side errors (status codes not in the 400 range)
-          }
+        if (horoscopeTextsResponseCount.status !== 200) {
+          console.error(horoscopeTextsResponseCount.statusText);
         }
 
-        if (true) {
-        // if (!astrologicalSignsResponse.ok) {
-        //   if (astrologicalSignsResponse.status >= 400 && astrologicalSignsResponse.status < 500) {
-        //     // console.error(`Client-side error with status: ${response.status}`);  // Handle client-side errors (status codes in the 400 range)
-        //
-        //     const error = await astrologicalSignsResponse.json();
-        //
-        //     console.error(error.message);
-        //     // TODO: Error notification
-        //
-        //     return {astrologicalSigns: null}; // Or return an appropriate value for client errors
-        //   } else {
-        //     throw new Error(`API request failed with status: ${astrologicalSignsResponse.status}`);  // Handle other server-side errors (status codes not in the 400 range)
-        //   }
-        // }
-        //
-        // if (!tagsResponse.ok) {
-        //   if (tagsResponse.status >= 400 && tagsResponse.status < 500) {
-        //     // console.error(`Client-side error with status: ${response.status}`);  // Handle client-side errors (status codes in the 400 range)
-        //
-        //     const error = await tagsResponse.json();
-        //
-        //     console.error(error.message);
-        //     // TODO: Error notification
-        //
-        //     return { tags: null }; // Or return an appropriate value for client errors
-        //   } else {
-        //     throw new Error(`API request failed with status: ${tagsResponse.status}`);  // Handle other server-side errors (status codes not in the 400 range)
-        //   }
-        // }
-        }
-
-        const horoscopeTextsData = await horoscopeTextsResponse.json();
-        const horoscopeTextsCountData = await horoscopeTextsResponseCount.json();
-        // const astrologicalSignsData = await astrologicalSignsResponse.json();
-        // const tagsData = await tagsResponse.json();
-
-        this.horoscopeTexts = horoscopeTextsData;
-        this.horoscopeTextsCount = horoscopeTextsCountData.count;
+        this.horoscopeTexts = horoscopeTextsResponse.data;
+        this.horoscopeTextsCount = horoscopeTextsResponseCount.data.count;
 
         this.isFetchingData = false;
       } catch (error) {
-        console.error(error);
+        this.isFetchingData = false;
+        console.log(error.response)
+        this.handleError(error);
+
         return {
           horoscopeTexts: null,
           horoscopeTextsCountData: null,
-          // astrologicalSigns: null,
-          // tags: null,
         };
       }
       console.log('fetchData ---> Finished');
@@ -540,8 +566,6 @@ export default {
       }
     },
     async removeTag(index, tag) {
-      console.log(tag);
-      console.log(tag.id);
       const horoscopeText = this.horoscopeTexts[index];
       const textId = this.horoscopeTexts[index].id;
       const tagId = tag.id;
@@ -567,27 +591,29 @@ export default {
     async refreshTags() {
       try {
         const [tagsResponse] = await Promise.all([
-          fetch(API_TAGS),
+          this.$axios.get(API_TAGS),
         ]);
 
-        if (!tagsResponse.ok) {
-          if (tagsResponse.status >= 400 && tagsResponse.status < 500) {
-            console.log(tagsResponse);
-            // console.error(`Client-side error with status: ${response.status}`);  // Handle client-side errors (status codes in the 400 range)
-
-            const error = await tagsResponse.json();
-
-            console.error(error.message);
-            // TODO: Error notification
-
-            return { tags: null }; // Or return an appropriate value for client errors
-          } else {
-            throw new Error(`API request failed with status: ${tagsResponse.status}`);  // Handle other server-side errors (status codes not in the 400 range)
-          }
+        if (tagsResponse.status !== 200) {
+          console.error(tagsResponse.statusText);
         }
 
-        this.tags = await tagsResponse.json();
-
+        // if (!tagsResponse.ok) {
+        //   if (tagsResponse.status >= 400 && tagsResponse.status < 500) {
+        //     console.log(tagsResponse);
+        //     // console.error(`Client-side error with status: ${response.status}`);  // Handle client-side errors (status codes in the 400 range)
+        //
+        //     const error = await tagsResponse.json();
+        //     console.error(error.message);
+        //     // TODO: Error notification
+        //
+        //     return { tags: null }; // Or return an appropriate value for client errors
+        //   } else {
+        //     throw new Error(`API request failed with status: ${tagsResponse.status}`);  // Handle other server-side errors (status codes not in the 400 range)
+        //   }
+        // }
+        // this.tags = await tagsResponse.json();
+        this.tags = tagsResponse.data;
       } catch (error) {
         console.error(error);
         return {
@@ -601,9 +627,6 @@ export default {
       console.log(data.date);
       console.log(data.sign);
 
-      // const isConfirmed = await stulipanNotify.showConfirmation('Egy publikálást fogsz hozzáadni. Mehet?');
-      // if (!isConfirmed) return;
-
       try {
         console.log('addHoroscopeTextPublished');
         const textId = this.horoscopeTexts[index].id;
@@ -614,39 +637,9 @@ export default {
         }
 
         const response = await this.$axios.post(API_HOROSCOPE_TEXT + `${textId}` + '/published/', horoscopeTextPublished);
-        console.log(response.data);
-        console.log('this.horoscopeTexts[index] BEFORE');
-        console.log(index);
-        console.log(this.horoscopeTexts[index]);
-        // this.horoscopeTexts[index] = response.data;  // HoroscopeText jön vissza
-        // this.horoscopeTexts[index].horoscopeTextsPublished = response.data.horoscopeTextsPublished;
-
         this.updateHoroscopeTextAtIndex(index, response.data);
-
-        console.log('this.horoscopeTexts[index] AFTER');
-        console.log(index);
-        console.log(this.horoscopeTexts[index]);
-
-        console.log('Published: Sikeresen elmentve!');
-
         stulipanNotify.success((Wording.horoscopeText.addHoroscopeTextPublishedSuccessful).replace('{{sign}}', horoscopeTextPublished.astrologicalSign.name).replace('{{date}}', horoscopeTextPublished.publishDate));
-
       } catch (error) {
-        // if (error.response) {
-        //   // The request was made and the server responded with a status code that falls out of the range of 2xx
-        //   console.error('Az API-hívás hibát dobott:', error.response.status);
-        //   const errorData = error.response.data;
-        //   console.error(errorData.message);
-        //   stulipanNotify.error(
-        //     errorData.message + ' (' + error.response.status + ': ' + errorData.error + ')'
-        //   );
-        // } else if (error.request) {
-        //   // The request was made but no response was received
-        //   console.error('Request made but no response received:', error.request);
-        // } else {
-        //   // Something else happened while setting up the request
-        //   console.error('Error:', error.message);
-        // }
         this.handleError(error);
       }
     },
@@ -669,27 +662,8 @@ export default {
         console.log('Removed: Sikeresen törölve!');
         stulipanNotify.success(Wording.horoscopeText.removeHoroscopeTextPublishedSuccessful);
       } catch (error) {
-        // if (error.response) {
-        //   // The request was made and the server responded with a status code that falls out of the range of 2xx
-        //   console.error('Az API-hívás hibát dobott:', error.response.status);
-        //   const errorData = error.response.data;
-        //   console.error(errorData.message);
-        //
-        //   console.log(error.response);
-        //   stulipanNotify.error(
-        //     errorData.message + ' (' + error.response.status + ': ' + errorData.error + ')'
-        //   );
-        // } else if (error.request) {
-        //   // The request was made but no response was received
-        //   console.error('Request made but no response received:', error.request);
-        // } else {
-        //   // Something else happened while setting up the request
-        //   console.error('Error:', error.message);
-        // }
         this.handleError(error);
       }
-
-
     },
 
     togglePreview() {
@@ -714,6 +688,13 @@ export default {
       };
 
       this.$router.push(newRoute);
+    },
+    setBackToUrl() {
+      if (this.$route.name === 'horoscope-texts-tag' || this.$route.name === 'horoscope-texts-date') {
+        this.goBackTo = { name: 'horoscope-texts' };
+      } else {
+        this.goBackTo = { name: 'index' };
+      }
     },
 
     async syncHoroscopeToManychat() {
@@ -766,6 +747,8 @@ export default {
 
         console.error('API-hívás hibakód:', responseStatus);  // The request was made and the server responded with a status code that falls out of the range of 2xx
         console.error(responseData.message);
+        this.fetchError.message = responseData.message;
+        console.log(this.fetchError.message)
         stulipanNotify.error(
           `${responseData.message} (${responseStatus}: ${responseData.error})`
         );
@@ -789,8 +772,8 @@ export default {
       ],
     };
   },
-
   async created() {
+    this.setBackToUrl()
     this.prefixes = FortunaPrefixes.prefixes.map(({ start, end }, index) => ({
       id: index,
       prefix: start,
@@ -814,20 +797,29 @@ export default {
 
     // this.totalPages = Math.ceil(this.horoscopeTextsCount / this.pageSize);
 
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    this.currentDate = tomorrow.toISOString().split('T')[0];  // We use toISOString() to get a string representation of the date in ISO format (yyyy-mm-ddThh:mm:ss.sssZ).
+    console.log('curentDate ---> ' + this.currentDate);
+
     this.currentPage = parseInt(this.$route.query.page, 10) || 1;
-    await this.fetchData();
+    await this.fetchData().then(() => {
+      // const multiselects = document.querySelectorAll('.multiselect');
+      // console.log(multiselects);
+      // multiselects.forEach(ms => {
+      //   ms.classList.add('multiselect--active');
+      //   const contentWrapper = ms.querySelector('.multiselect__content-wrapper');
+      //   contentWrapper.style.display = 'block';
+      //
+      //   const mEl = contentWrapper.querySelector('.multiselect__content');
+      //   mEl.style.display = 'block';
+      //
+      // });
+    });
     console.log('created ---> finished')
   },
 
   mounted() {
-    // const myModal = new StulipanModal({
-    //   target: '#devModal',
-    //   closeOnEsc: true,
-    // });
-    // myModal.show();
-
-
-
     // const notifyTop = new StulipanNotify({position: 'top-left', isFluid: true});
     // notifyTop.error('Ez egy notify tipusu uzenet.');
 
@@ -840,7 +832,6 @@ export default {
     };
     stulipanNotify.configure(notifyConfig);
     // stulipanNotify.success('This is a very long, in fact more than longer notification message displayed on the screen.');
-
   },
 
   beforeRouteUpdate(to, from, next) {
@@ -850,45 +841,202 @@ export default {
     this.fetchData();
     next();
   }
-
-  // // NOT IN USE !!!
-  // async asyncData() {
-  //   // const requestQueue = new RequestQueue();
-  //   //
-  //   // const fetchHoroscopeTexts = async () => {
-  //   //   const response = await fetch(API_HOROSCOPE_TEXT);
-  //   //   return response.ok ? response.json() : Promise.reject(response.status);
-  //   // };
-  //   //
-  //   // const fetchAstrologicalSigns = async () => {
-  //   //   const response = await fetch(API_ASTROLOGICAL_SIGN);
-  //   //   return response.ok ? response.json() : Promise.reject(response.status);
-  //   // };
-  //   //
-  //   // const fetchTags = async () => {
-  //   //   const response = await fetch(API_TAGS);
-  //   //   return response.ok ? response.json() : Promise.reject(response.status);
-  //   // };
-  //   //
-  //   //
-  //   // // Add requests to the requestQueue
-  //   // const [horoscopeTextsData, astrologicalSignsData, tagsData] = await Promise.all([
-  //   //   requestQueue.addRequest(fetchHoroscopeTexts),
-  //   //   requestQueue.addRequest(fetchAstrologicalSigns),
-  //   //   requestQueue.addRequest(fetchTags),
-  //   // ]);
-  //   //
-  //   // return {
-  //   //   horoscopeTexts: horoscopeTextsData,
-  //   //   astrologicalSigns: astrologicalSignsData,
-  //   //   tags: tagsData,
-  //   // };
-  // },
 }
 
 </script>
 
 <style>
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1040;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0);
+}
+
+.modal-backdrop.hide {
+  opacity: 0;
+  transition: opacity .2s linear;
+}
+.modal-backdrop.show {
+  opacity: .3;
+  transition: opacity .3s linear;
+}
+
+
+
+.sidebar {
+  /*display: block !important;*/
+}
+
+.sidebar-right .sidebar-dialog {
+  margin-left: auto;
+}
+
+.sidebar-right .sidebar-dialog {
+  width: 550px;
+  right: -550px;
+}
+
+.sidebar-right.show .sidebar-dialog{
+  right: 0;
+  animation: dialog_slideIn 0.3s ease-in-out;
+}
+
+.sidebar-right.hide .sidebar-dialog{
+  right: -550px;
+  animation: dialog_slideOut 0.2s ease-out;
+}
+
+@keyframes dialog_slideIn {
+  0% {
+    right: -550px;
+  }
+  100% {
+    right: 0;
+  }
+}
+
+@keyframes dialog_slideOut {
+  0% {
+    right: 0;
+  }
+  100% {
+    right: -550px;
+  }
+}
+
+.sidebar-dialog {
+  position: fixed;
+  top: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  /*position: relative;*/
+  /*display: flex;*/
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  width: auto;
+  margin: 0 0;
+  pointer-events: none;
+  box-shadow: 0 0 12px 0 rgba(0,0,0,.1), 0 10px 30px 0 rgba(0,0,0,.2);
+}
+
+.sidebar-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+  background-color: #fff;
+  background-clip: padding-box;
+  border-radius: 0;
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.5);
+  outline: 0;
+}
+
+.sidebar-scrollable .sidebar-content {
+  overflow: hidden;
+}
+
+.sidebar-content .close {
+  position: absolute;
+  top: calc(1 * var(--apt-modal-close-button-width)/ 2);
+  right: calc(1 * var(--apt-modal-close-button-width)/ 2);
+  z-index: 1051;
+  overflow: hidden;
+  width: var(--apt-modal-close-button-width);
+  height: var(--apt-modal-close-button-width);
+  background-color: var(--apt-modal-close-button-bg);
+  color: var(--apt-modal-close-button-color);
+  border: var(--apt-modal-border-width) solid var(--apt-modal-border-color);
+  border-radius: var(--apt-modal-close-button-radius);
+}
+
+.sidebar-content .close span::after {
+  content: "×";
+  font-size: 22px;
+  line-height: 1;
+  color: var(--apt-modal-close-button-color);
+}
+
+
+
+
+/*.sidebar {*/
+/*  display: block !important;*/
+/*}*/
+
+/*.sidebar.sidebar-right {*/
+/*  margin-left: auto;*/
+/*  transition: right 0.2s ease-out, left 0.2s ease-out;*/
+/*}*/
+
+/*.sidebar.sidebar-right {*/
+/*  width: 550px;*/
+/*  right: -550px;*/
+/*}*/
+
+/*.sidebar.sidebar-right.show {*/
+/*  right: 0;*/
+/*  transition: right 0.2s ease-out, left 0.2s ease-out;*/
+/*}*/
+
+/*.sidebar-dialog {*/
+/*  position: relative;*/
+/*  display: flex;*/
+/*  flex-direction: column;*/
+/*  justify-content: center;*/
+/*  height: 100%;*/
+/*  width: auto;*/
+/*  margin: 0 0;*/
+/*  pointer-events: none;*/
+/*}*/
+
+/*.sidebar-content {*/
+/*  position: relative;*/
+/*  display: flex;*/
+/*  flex-direction: column;*/
+/*  width: 100%;*/
+/*  height: 100%;*/
+/*  pointer-events: auto;*/
+/*  background-color: #fff;*/
+/*  background-clip: padding-box;*/
+/*  border-radius: 0;*/
+/*  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.5);*/
+/*  outline: 0;*/
+/*}*/
+
+/*.sidebar-scrollable .sidebar-content {*/
+/*  overflow: hidden;*/
+/*}*/
+
+/*.sidebar-content .close {*/
+/*  position: absolute;*/
+/*  top: calc(1 * var(--apt-modal-close-button-width)/ 2);*/
+/*  right: calc(1 * var(--apt-modal-close-button-width)/ 2);*/
+/*  z-index: 1051;*/
+/*  overflow: hidden;*/
+/*  width: var(--apt-modal-close-button-width);*/
+/*  height: var(--apt-modal-close-button-width);*/
+/*  background-color: var(--apt-modal-close-button-bg);*/
+/*  color: var(--apt-modal-close-button-color);*/
+/*  border: var(--apt-modal-border-width) solid var(--apt-modal-border-color);*/
+/*  border-radius: var(--apt-modal-close-button-radius);*/
+/*}*/
+
+/*.sidebar-content .close span::after {*/
+/*  content: "×";*/
+/*  font-size: 22px;*/
+/*  line-height: 1;*/
+/*  color: var(--apt-modal-close-button-color);*/
+/*}*/
+
 /*.modal {*/
 
 /*  !*width: 100%;*!*/
@@ -1035,6 +1183,9 @@ export default {
 /*  }*/
 /*}*/
 
+.invalid-feedback {
+  display: block;
+}
 
 .white-space {
   white-space: pre-wrap;

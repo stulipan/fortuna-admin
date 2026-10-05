@@ -7,3 +7,7 @@ https://nuxtjs.org/guide/plugins
 
 **This directory is not required, you can delete it if you don't want to use it.**
 
+## More explanation
+
+The `plugins` directory is commonly used for code that needs to be executed before the application starts. Plugins are run once during the initialization phase, making them suitable for tasks like configuring global plugins, initializing libraries, and setting up defaults for external libraries (like Axios).
+

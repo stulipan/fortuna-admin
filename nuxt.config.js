@@ -1,9 +1,7 @@
+// const webpack = require('webpack');
 const axios = require('axios');
 
 export default {
-  /*
-  ** Headers of the page
-  */
   head: {
     title: 'fortuna-admin',
     meta: [
@@ -17,30 +15,21 @@ export default {
       { rel: 'stylesheet', href: '/style/fonts/fontawesome-6.4.2/css/all.css' },
     ],
   },
-  /*
-  ** Customize the progress bar color
-  */
+  /* Customize the progress bar color */
   loading: { color: '#3B8070' },
   /*
   ** Build configuration
   */
   build: {
-    /*
-    ** Run ESLint on save
-    */
     extend(config, { isDev, isClient }) {
-      if (isDev && isClient) {
-        // Add Babel loader for JavaScript files
-        // config.module.rules.push({
-        //   test: /\.js$/,
-        //   loader: 'babel-loader',
-        //   exclude: /(node_modules)/,
-        //   options: {
-        //     presets: ['@babel/preset-env'],
-        //     plugins: [require('@babel/plugin-proposal-private-methods')],
-        //   },
-        // });
+      // // Remove comments from JavaScript files
+      // config.plugins.push(
+      //   new webpack.optimize.minimize({
+      //     comments: false
+      //   })
+      // );
 
+      if (isDev && isClient) {
         // Add ESLint loader (optional, if not already present)
         config.module.rules.push({
           enforce: 'pre',
@@ -50,27 +39,10 @@ export default {
         });
       }
     },
-
-    // /*
-    // ** Run ESLint on save
-    // */
-    // extend (config, { isDev, isClient }) {
-    //   if (isDev && isClient) {
-    //     config.module.rules.push({
-    //       enforce: 'pre',
-    //       test: /\.(js|vue)$/,
-    //       loader: 'eslint-loader',
-    //       exclude: /(node_modules)/
-    //     })
-    //   }
-    // }
   },
 
   plugins: [
-    '~/plugins/wording-plugin.js',
-    // { src: '~/plugins/StulipanNotify.js', ssr: false },
-    // { src: '~/plugins/StulipanNotifyW.js', ssr: false },
-    // { src: '~/plugins/StulipanModal.js', ssr: false },
+    '~/plugins/axios-config.js',
   ],
 
   modules: [
@@ -92,68 +64,47 @@ export default {
 
   },
 
+  publicRuntimeConfig: {
+    BACKEND_API_TOKEN: process.env.BACKEND_API_TOKEN,
+  },
+
   // Define the dynamic route
   router: {
     extendRoutes(routes, resolve) {
-      // // Find the index of the route with the name 'horoscope-texts-date'
-      // const dateRouteIndex = routes.findIndex(route => route.name === 'horoscope-texts-date');
-      //
-      // // Check if the route was found
-      // if (dateRouteIndex !== -1) {
-      //   // Duplicate the route to create a new one with 'preview' as an optional parameter
-      //   const dateRoute = { ...routes[dateRouteIndex] };
-      //   dateRoute.path = `${dateRoute.path}/date/:date?/:preview?`; // Add '?' to make 'preview' optional
-      //   dateRoute.name = 'horoscope-texts-date-preview'; // Choose a new name for the route
-      //
-      //   // Insert the modified route into the routes array
-      //   routes.splice(dateRouteIndex + 1, 0, dateRoute);
-      // }
-
+      // EZ NEM KELL MERT, ALAPBOL EZ IGY VAN
+      // DE MEGIS KELL, mert nelkule nem frissul az oldal F5-re!
       routes.push({
-        name: 'horoscope-texts',
+        // name: 'horoscope-texts',
         path: '/horoscope-texts',
         component: resolve(__dirname, 'pages/horoscope-texts/index.vue')
       });
 
       routes.push({
-        name: 'horoscope-texts-date',
+        // name: 'horoscope-texts-date',
         path: '/horoscope-texts/date/:date',
         component: resolve(__dirname, 'pages/horoscope-texts/index.vue')
       });
 
       // Add a new route for tags
       routes.push({
-        name: 'horoscope-texts-tag',
+        // name: 'horoscope-texts-tag',
         path: '/horoscope-texts/tag/:tag',
         component: resolve(__dirname, 'pages/horoscope-texts/index.vue')
       });
 
-
-      // routes.push({
-      //   name: 'horoscope-texts-all',
-      //   path: '/horoscope-texts/',
-      //   component: resolve(__dirname, 'pages/horoscope-texts/_date.vue')
-      // });
-      //
-      // routes.push({
-      //   name: 'horoscope-texts-date',
-      //   path: '/horoscope-texts/date/:date',
-      //   component: resolve(__dirname, 'pages/horoscope-texts/_date.vue')
-      // });
-      //
-      // // Add a new route for tags
-      // routes.push({
-      //   name: 'horoscope-texts-tag',
-      //   path: '/horoscope-texts/tag/:tag',
-      //   component: resolve(__dirname, 'pages/horoscope-texts/_date.vue')
-      // });
-
+      // EZ NEM KELL MERT, ALAPBOL EZ IGY VAN
+      // DE MEGIS KELL, mert nelkule nem frissul az oldal F5-re!
+      routes.push({
+        // name: 'show-rewritten',
+        path: '/show-rewritten/',
+        component: resolve(__dirname, 'pages/show-rewritten/index.vue')
+      });
 
       routes.push({
-        name: 'show-rewritten',
+        // name: 'show-rewritten-date',
         path: '/show-rewritten/:date/:locale',
         component: resolve(__dirname, 'pages/show-rewritten/_date.vue')
       });
     }
-  }
+  },
 };
