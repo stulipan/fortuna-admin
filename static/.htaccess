@@ -1,4 +1,10 @@
 # Admin SPA: létező fájl megy, minden más a 200.html-re
+AuthType Basic
+AuthName "Secured Area"
+AuthUserFile /home/tulipanf/.htpasswds/fortuna-admin/passwd
+Require valid-user
+ErrorDocument 401 default
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteCond %{HTTPS} off
