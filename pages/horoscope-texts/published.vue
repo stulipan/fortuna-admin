@@ -26,16 +26,29 @@
               </div>
             </div>
 
-            <div class="col-lg-12 correction-no-paddingX mt-20px">
+            <div v-if="!months" class="col-lg-12 correction-no-paddingX mt-20px">
+              <div class="alert alert-danger">Nem sikerült betölteni a publikálásokat.</div>
+            </div>
+
+            <!-- Hónaponként egy kártya, benne minden nap (a publikálás nélküliek is) _byClaude -->
+            <div v-for="month in months" :key="month.key" class="col-lg-12 correction-no-paddingX mb-3">
               <div class="card">
+                <div class="card-body pb-0">
+                  <div class="h5 card-title">{{ month.title }}</div>
+                </div>
                 <div class="table-responsive">
-                  <table class="table table-hover table-striped">
+                  <table class="table table-hover table-striped mb-0">
                     <tbody>
-                      <tr v-for="item in fetchedData" :key="item.date">
-                        <td>
-                          <NuxtLink :to="`/show-rewritten/${item.date}/hu`">
-                            {{ item.date }}
-                          </NuxtLink>
+                      <tr v-for="day in month.days" :key="day.date">
+                        <td class="text-nowrap">
+                          <NuxtLink v-if="day.count" :to="`/horoscope-texts/date/${day.date}`">{{ day.date }}</NuxtLink>
+                          <span v-else class="text-muted">{{ day.date }}</span>
+                          <div class="small text-muted">{{ day.weekday }}</div>
+                        </td>
+                        <td class="text-end w-100">
+                          <span class="badge" :class="day.missing.length ? 'bg-danger' : 'bg-success'">{{ day.count }}/{{ signs.length }}</span>
+                          <div v-if="day.count === 0" class="small text-danger">Nincs publikálás</div>
+                          <div v-else-if="day.missing.length" class="small text-danger">Hiányzik: {{ day.missing.join(', ') }}</div>
                         </td>
                       </tr>
                     </tbody>
@@ -50,47 +63,72 @@
 </template>
 
 <script>
-import {Wording} from "assets/Wording";
-import {FortunaPrefixes} from "assets/FortunaPrefixes";
-
 const API_URI = `${process.env.BACKEND_URL}/api`;
 export default {
   data() {
     return {
-      isFetchingData: true,
       goBackTo: { name: 'index'},
     };
   },
+
+  // Publikálási napok + csillagjegyek betöltése _byClaude
   async asyncData({$axios}) {
     try {
-      const response = await $axios.get(API_URI + '/horoscope-final');
-      return { fetchedData: response.data };
+      const [dates, signs] = await Promise.all([
+        $axios.get(API_URI + '/horoscope-text-published/dates'),
+        $axios.get(API_URI + '/astrological-signs/'),
+      ]);
+      return { publishedDates: dates.data, signs: signs.data.map(sign => sign.name) };
     } catch (error) {
-      // Handle error if the request fails
       console.error(error);
-      return { fetchedData: null };
+      return { publishedDates: null, signs: [] };
     }
+  },
+
+  computed: {
+    // Napok a legújabbtól a legrégebbi publikálásig, hónapokba csoportosítva _byClaude
+    months() {
+      if (!this.publishedDates || !this.publishedDates.length) {
+        return null;
+      }
+      const byDate = {};
+      this.publishedDates.forEach(item => { byDate[item.publishDate] = item.signs; });
+
+      const monthFormat = new Intl.DateTimeFormat('hu-HU', { year: 'numeric', month: 'long', timeZone: 'UTC' });
+      const weekdayFormat = new Intl.DateTimeFormat('hu-HU', { weekday: 'long', timeZone: 'UTC' });
+      const first = new Date(this.publishedDates[this.publishedDates.length - 1].publishDate + 'T00:00:00Z');
+      const months = [];
+
+      for (let day = new Date(this.publishedDates[0].publishDate + 'T00:00:00Z'); day >= first; day.setUTCDate(day.getUTCDate() - 1)) {
+        const date = day.toISOString().slice(0, 10);
+        const published = byDate[date] || [];
+        if (!months.length || months[months.length - 1].key !== date.slice(0, 7)) {
+          months.push({ key: date.slice(0, 7), title: monthFormat.format(day), days: [] });
+        }
+        months[months.length - 1].days.push({
+          date,
+          weekday: weekdayFormat.format(day),
+          count: published.length,
+          missing: this.signs.filter(sign => !published.includes(sign)),
+        });
+      }
+      return months;
+    },
   },
 
   head() {
     return {
-      title: 'Átírt horoszkópok',
+      title: 'Publikálások',
       meta: [
         {
-          // hid: 'description',
-          name: 'Átírt horoszkópok',
-          content: 'A régi felület, ahol átírtam az ezós horikat.',
+          name: 'Publikálások',
+          content: 'A publikált horoszkópok listája, publikálási dátum szerint.',
         },
       ],
     };
   },
-  created() {
-  }
-
-
 }
 </script>
 
 <style>
 </style>
-
