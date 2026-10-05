@@ -187,8 +187,8 @@ import Cookies from 'js-cookie';
 import PreviewBlock from "@/components/PreviewBlock";
 import {stulipanNotify} from "@/plugins/StulipanNotify";
 
-const API_URI = 'http://fortunaai.hu/api';
-const REWRITE_URI = 'http://www.fortunaai.hu/rewrite';
+const API_URI = `${process.env.BACKEND_URL}/api`;
+const REWRITE_URI = `${process.env.BACKEND_URL}/rewrite`;
 export default {
   components: {
     PreviewBlock,
@@ -393,7 +393,7 @@ export default {
     async onSubmitTextarea(bundled) {
       try {
         console.log(this.$axios.defaults);
-        const response = await this.$axios.put('http://fortunaai.hu/api/horoscope-bundled/', bundled);
+        const response = await this.$axios.put(`${process.env.BACKEND_URL}/api/horoscope-bundled/`, bundled);
         console.log(response);
         console.log(response.data.astrologicalSign.name);
 

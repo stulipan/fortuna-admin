@@ -2,6 +2,15 @@
 const axios = require('axios');
 
 export default {
+  // Statikus SPA build (Apache-on fut, Node nélkül)
+  ssr: false,
+  target: 'static',
+
+  // Backend címe (felülírható a BACKEND_URL környezeti változóval)
+  env: {
+    BACKEND_URL: process.env.BACKEND_URL || 'https://fortuna.tulipanfutar.hu',
+  },
+
   head: {
     title: 'fortuna-admin',
     meta: [
@@ -10,9 +19,9 @@ export default {
       // { hid: 'description', name: 'description', content: 'The admin backend for the FortunaAI project.' }
     ],
     link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/style/favicon/favicon-admin.png' },
-      { rel: 'stylesheet', href: '/style/admin-panel-theme.min.css' },
-      { rel: 'stylesheet', href: '/style/fonts/fontawesome-6.4.2/css/all.css' },
+      { rel: 'icon', type: 'image/x-icon', href: '/admin/style/favicon/favicon-admin.png' },
+      { rel: 'stylesheet', href: '/admin/style/admin-panel-theme.min.css' },
+      { rel: 'stylesheet', href: '/admin/style/fonts/fontawesome-6.4.2/css/all.css' },
     ],
   },
   /* Customize the progress bar color */
@@ -70,6 +79,7 @@ export default {
 
   // Define the dynamic route
   router: {
+    base: '/admin/',
     extendRoutes(routes, resolve) {
       // EZ NEM KELL MERT, ALAPBOL EZ IGY VAN
       // DE MEGIS KELL, mert nelkule nem frissul az oldal F5-re!

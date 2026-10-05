@@ -50,7 +50,7 @@
                       </NuxtLink>
                     </li>
                     <li class="settings-item">
-                      <a href="http://www.fortunaai.hu/" target="_blank" class="w-100 h-100">
+                      <a :href="backendUrl" target="_blank" class="w-100 h-100">
                         <div class="settings-item-body">
                           <div class="settings-icon">
                             <i class="fa-solid fa-cloud-arrow-down"></i>
@@ -60,14 +60,14 @@
                               <span class="text-primary">Import from EzoTV</span>
                             </div>
                             <div>
-                              Server oldali weboldal: Fortunaai.hu
+                              Server oldali weboldal: Fortuna backend
                             </div>
                           </div>
                         </div>
                       </a>
                     </li>
                     <li class="settings-item">
-                      <NuxtLink to="http://www.fortunaai.hu/" target="_blank" class="w-100 h-100">
+                      <NuxtLink to="/horoscope-texts/published" class="w-100 h-100">
                         <div class="settings-item-body">
                           <div class="settings-icon">
                             <i class="fa-regular fa-clock"></i>
@@ -110,6 +110,11 @@ export default {
   //
   //   return {};
   // },
+  data() {
+    return {
+      backendUrl: process.env.BACKEND_URL,
+    };
+  },
   head() {
     return {
       title: 'Dashboard',

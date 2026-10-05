@@ -53,7 +53,7 @@
 import {Wording} from "assets/Wording";
 import {FortunaPrefixes} from "assets/FortunaPrefixes";
 
-const API_URI = 'http://fortunaai.hu/api';
+const API_URI = `${process.env.BACKEND_URL}/api`;
 export default {
   data() {
     return {
@@ -61,13 +61,10 @@ export default {
       goBackTo: { name: 'index'},
     };
   },
-  async asyncData() {
+  async asyncData({$axios}) {
     try {
-      const response = await fetch(API_URI + '/horoscope-final');
-      const data = await response.json();
-
-      // Return the fetched data
-      return { fetchedData: data };
+      const response = await $axios.get(API_URI + '/horoscope-final');
+      return { fetchedData: response.data };
     } catch (error) {
       // Handle error if the request fails
       console.error(error);

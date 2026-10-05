@@ -251,14 +251,14 @@ import NotFound from "@/components/stulipan/NotFound";
 
 import DatePicker from "~/components/stulipan/DatePicker";
 
-const API_URI = 'http://fortunaai.hu/api';
-const API_HOROSCOPE_TEXT = 'http://fortunaai.hu/api/horoscope-texts/';
-// const API_HOROSCOPE_TEXT = 'http://fortunaai.hu/api/horoscope-text-published/';
-const API_HOROSCOPE_TEXT_COUNT = 'http://fortunaai.hu/api/horoscope-texts/count/';
-const API_ASTROLOGICAL_SIGN = 'http://fortunaai.hu/api/astrological-signs/';
-const API_TAGS = 'http://fortunaai.hu/api/tags/';
+const API_URI = `${process.env.BACKEND_URL}/api`;
+const API_HOROSCOPE_TEXT = `${process.env.BACKEND_URL}/api/horoscope-texts/`;
+// const API_HOROSCOPE_TEXT = `${process.env.BACKEND_URL}/api/horoscope-text-published/`;
+const API_HOROSCOPE_TEXT_COUNT = `${process.env.BACKEND_URL}/api/horoscope-texts/count/`;
+const API_ASTROLOGICAL_SIGN = `${process.env.BACKEND_URL}/api/astrological-signs/`;
+const API_TAGS = `${process.env.BACKEND_URL}/api/tags/`;
 
-const API_POPULATE_BOT_FIELDS = 'http://fortunaai.hu/api/manychat/populate';
+const API_POPULATE_BOT_FIELDS = `${process.env.BACKEND_URL}/api/manychat/populate`;
 
 export default {
   components: {

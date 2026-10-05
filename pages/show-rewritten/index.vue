@@ -53,7 +53,7 @@
 import {Wording} from "assets/Wording";
 import {FortunaPrefixes} from "assets/FortunaPrefixes";
 
-const API_URI = 'http://fortunaai.hu/api';
+const API_URI = `${process.env.BACKEND_URL}/api`;
 export default {
   data() {
     return {
